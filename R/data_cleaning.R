@@ -38,7 +38,7 @@ tropical_storms <- storm_details %>%
         episode_id_chr = as.character(episode_id)
     )
 
-
+# test
 tropical_storms |>
     group_by(year) |>
     summarise(sum_damage_crops = sum(damage_crops_num, na.rm = TRUE)) |>

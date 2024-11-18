@@ -27,22 +27,57 @@ storm_location <- vroom(location_files)
 storm_details <- vroom(detail_files,  .name_repair = janitor::make_clean_names) # Main data
 storm_fatalities <- vroom(fatality_files)
 
-# Cleaning and selecting for "HURRICANE"
-tropical_storms <- storm_details %>%
-    filter(str_detect(event_type, 'Tropical')) %>%
+# Cleaning and selecting for "Storm"
+storms <- storm_details %>%
+    filter(str_detect(event_type, 'Storm')) %>%
     select(!dplyr::starts_with("tor")) %>%
     mutate(
         year_fct = as.factor(year),
-        damage_property_num = so_inverter(., "damage_property"),
-        damage_crops_num = so_inverter(., "damage_crops"),
+        damage_property = so_formatter(., "damage_property"),
+        damage_crops = so_formatter(., "damage_crops"),
         episode_id_chr = as.character(episode_id)
-    )
+   )
 
-# test
-tropical_storms |>
-    group_by(year) |>
+
+
+# Storm damages and fatalities
+
+storm_effects <- c("damage_property", "damage_crops", "deaths_direct", "deaths_indirect")
+str(storms)
+
+summarize_effects <- function(data, var){
+    data %>%
+        group_by(year, event_type) %>% # Should convert to variables in future
+        summarize("{{ var }} := sum({{ var }}, na.rm = TRUE)")
+    #arrange(desc({{ var }}))
+}
+
+
+map(storm_effects,
+    \(.x) summarize_effects(
+        storms,
+        var = .x
+    ))
+
+
+storms %>%
+    group_by(year, event_type) %>% # Should convert to variables in future
+    summarise(sum_damage_crops = sum(damage_crops, na.rm = TRUE))
+
+storms |>
+    group_by(year, event_type) |>
     summarise(sum_damage_crops = sum(damage_crops_num, na.rm = TRUE)) |>
-    ggplot() +
-    geom_line(aes(x = year, y = sum_damage_crops))
+    ggplot(aes(x = year, y = sum_damage_crops, colour = event_type)) +
+    geom_line() +
+    scale_y_continuous(labels = scales::label_currency(
+        prefix = "$",
+        scale_cut = c(
+            0,
+            K = 1e3,
+            M = 1e6,
+            B = 1e9
+        )
+    )) +
+    theme_light()
 
-
+str(tropical_storms)

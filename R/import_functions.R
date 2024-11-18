@@ -25,7 +25,8 @@ convert_str_num <- function(data, column) {
     num*suffval
 }
 
-so_inverter <- function(data, column) {
+# From "1M" to 1000000
+so_formatter <- function(data, column) {
     dplyr::case_when(
         grepl("K$", data[[column]]) ~ as.numeric(sub("K$", "", data[[column]])) * 1e3,
         grepl("M$", data[[column]]) ~ as.numeric(sub("M$", "", data[[column]])) * 1e6,
@@ -33,3 +34,14 @@ so_inverter <- function(data, column) {
         TRUE ~ as.numeric(data[[column]])
     )
 }
+
+
+# Summarizing damage and fatalities
+
+summarize_effects <- function(data, var){
+    data %>%
+        group_by(year, event_type) %>% # Should convert to variables in future
+        summarize("{{ var }}" := sum({{ var }}, na.rm = TRUE))
+        #arrange(desc({{ var }}))
+}
+

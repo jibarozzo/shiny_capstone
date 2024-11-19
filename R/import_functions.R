@@ -38,10 +38,9 @@ so_formatter <- function(data, column) {
 
 # Summarizing damage and fatalities
 
-summarize_effects <- function(data, var){
+summarize_effects <- function(data, .groups, var){
     data %>%
-        group_by(year, event_type) %>% # Should convert to variables in future
-        summarize("{{ var }}" := sum({{ var }}, na.rm = TRUE))
-        #arrange(desc({{ var }}))
+        group_by(across({{ .groups }})) %>% # Should convert to variables in future
+        summarize("sum_{{ var }}" := sum({{ var }}, na.rm = TRUE), .groups = "drop")
 }
 

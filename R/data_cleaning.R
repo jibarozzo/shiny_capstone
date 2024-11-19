@@ -45,17 +45,19 @@ storms <- storm_details %>%
 storm_effects <- c("damage_property", "damage_crops", "deaths_direct", "deaths_indirect")
 str(storms)
 
-summarize_effects <- function(data, var){
+summarize_effects <- function(data, .groups, var){
     data %>%
-        group_by(year, event_type) %>% # Should convert to variables in future
-        summarize("{{ var }} := sum({{ var }}, na.rm = TRUE)")
-    #arrange(desc({{ var }}))
+        group_by(across({{ .groups }})) %>% # Should convert to variables in future
+        summarize("sum_{{ var }}" := sum({{ var }}, na.rm = TRUE), .groups = "drop")
 }
 
+storms %>%
+    summarize_effects(., .groups = c(year_fct, event_type), var = damage_crops)
 
 map(storm_effects,
     \(.x) summarize_effects(
         storms,
+        .groups = c(year, event_type),
         var = .x
     ))
 
@@ -66,7 +68,7 @@ storms %>%
 
 storms |>
     group_by(year, event_type) |>
-    summarise(sum_damage_crops = sum(damage_crops_num, na.rm = TRUE)) |>
+    summarise(sum_damage_crops = sum(damage_crops, na.rm = TRUE)) |>
     ggplot(aes(x = year, y = sum_damage_crops, colour = event_type)) +
     geom_line() +
     scale_y_continuous(labels = scales::label_currency(

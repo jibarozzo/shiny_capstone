@@ -37,10 +37,31 @@ so_formatter <- function(data, column) {
 
 
 # Summarizing damage and fatalities
-
 summarize_effects <- function(data, .groups, var){
     data %>%
         group_by(across({{ .groups }})) %>% # Should convert to variables in future
         summarize("sum_{{ var }}" := sum({{ var }}, na.rm = TRUE), .groups = "drop")
 }
 
+# Ploting damages and fatalities
+storm_damages_ggplot <- function(df, y) {
+    .data <- df %>%
+        summarize_effects(.groups = c(year, event_type), var = {{ y }})
+    
+    # Generate the new column name dynamically using glue
+    col_name <- glue::glue("sum_{deparse(substitute(y))}")
+    
+    # Use !!sym() to refer to the new dynamic column
+    .data %>%
+        ggplot(aes(
+            x = year,
+            y = !!sym(col_name),
+            colour = event_type
+        )) +
+    geom_line() +
+    scale_y_continuous(labels = scales::label_currency(
+        prefix = "$",
+        scale_cut = c(0, K = 1e3, M = 1e6, B = 1e9)
+    )) +
+    theme_light()
+}

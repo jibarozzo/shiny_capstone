@@ -41,45 +41,20 @@ storms <- storm_details %>%
 
 
 # Storm damages and fatalities
-
-storm_effects <- c("damage_property", "damage_crops", "deaths_direct", "deaths_indirect")
-str(storms)
-
-summarize_effects <- function(data, .groups, var){
-    data %>%
-        group_by(across({{ .groups }})) %>% # Should convert to variables in future
-        summarize("sum_{{ var }}" := sum({{ var }}, na.rm = TRUE), .groups = "drop")
-}
-
+# Damage to crops
 storms %>%
-    summarize_effects(., .groups = c(year_fct, event_type), var = damage_crops)
+    storm_damages_ggplot(., y = damage_crops)
 
-map(storm_effects,
-    \(.x) summarize_effects(
-        storms,
-        .groups = c(year, event_type),
-        var = .x
-    ))
-
-
+# Damage to property
 storms %>%
-    group_by(year, event_type) %>% # Should convert to variables in future
-    summarise(sum_damage_crops = sum(damage_crops, na.rm = TRUE))
+    storm_damages_ggplot(., y = damage_property)
 
-storms |>
-    group_by(year, event_type) |>
-    summarise(sum_damage_crops = sum(damage_crops, na.rm = TRUE)) |>
-    ggplot(aes(x = year, y = sum_damage_crops, colour = event_type)) +
-    geom_line() +
-    scale_y_continuous(labels = scales::label_currency(
-        prefix = "$",
-        scale_cut = c(
-            0,
-            K = 1e3,
-            M = 1e6,
-            B = 1e9
-        )
-    )) +
-    theme_light()
+# Indirect fatalities
+storms %>%
+    storm_damages_ggplot(., y = deaths_indirect)
 
-str(tropical_storms)
+# Direct deaths
+storms %>%
+    storm_damages_ggplot(., y = deaths_direct)
+
+

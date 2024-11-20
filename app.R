@@ -5,8 +5,9 @@ source("R/imp_clean_funs.R")
 
 
 # Loading data
-load("data/output/storms.rda")
-storms <- readRDS(here::here("data/output/storms.rds"))
+# App sources files in R/ and loads necesary objects
+# load("data/output/storms.rda")
+
 
 storm_vars <- c(
     "Crop Damage" = "damage_crops",

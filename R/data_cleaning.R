@@ -61,4 +61,4 @@ storms <- storm_details %>%
     slice_sample(n = 1000)
 
 
-saveRDS(storms, file = "data/output/storms.rds")
+save(storms, file = "data/output/storms.rda")

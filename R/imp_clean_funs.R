@@ -1,4 +1,5 @@
-# Useful functions for importing data
+# Functions for importing and cleaning data for "shiny_captone" project
+
 
 read_data <- function(x, pattern) {
     # Creating a list of files
@@ -13,7 +14,6 @@ read_data <- function(x, pattern) {
 }
 
 # Modified from https://stackoverflow.com/questions/63601709/is-there-a-way-to-convert-1-00m-to-1-000-000
-
 # This function creates a named number vector FYI
 convert_str_num <- function(data, column) {
     suffs <- c(K=1e3, M=1e6, B=1e9)
@@ -25,7 +25,7 @@ convert_str_num <- function(data, column) {
     num*suffval
 }
 
-# From "1M" to 1000000
+# String to number formatter (e.g., "1M" to 1000000)
 so_formatter <- function(data, column) {
     dplyr::case_when(
         grepl("K$", data[[column]]) ~ as.numeric(sub("K$", "", data[[column]])) * 1e3,
@@ -43,7 +43,7 @@ summarize_effects <- function(data, .groups, var){
         summarize("sum_{{ var }}" := sum({{ var }}, na.rm = TRUE), .groups = "drop")
 }
 
-# Ploting damages and fatalities
+# Plotting damages and fatalities
 storm_damages_ggplot <- function(df, y) {
     .data <- df %>%
         summarize_effects(.groups = c(year, event_type), var = {{ y }})

@@ -16,35 +16,22 @@ storm_vars <- c(
 )
 
 ui <- page_sidebar(
-    title = "Storm Damage in the US", 
+    theme = bs_theme(version = 5, preset = "superhero"),
+    title = "Storm Damage in the US",
     sidebar = sidebar(
-        actionButton("btn_all_region", "All Regions", class = "btn-danger"),
-        actionButton("btn_west", "West"),
-        actionButton("btn_north_central", "North Central"),
-        actionButton("btn_northeast", "Northeast"),
-        actionButton("btn_south", "South"),
+        actionButton("btn_all_region", "All Regions", class = "btn-primary"),
+        actionButton("btn_west", "West", class = "btn-secondary"),
+        actionButton("btn_north_central", "North Central", class = "btn-success"),
+        actionButton("btn_northeast", "Northeast", class = "btn-warning"),
+        actionButton("btn_south", "South", class = "btn-dark"),
         hr(),
-        
+
         selectInput(
             "var",
             "Select a variable",
             choices = storm_vars,
             selected = "damage_property"
         )
-        
-        # Old logic
-        # selectInput(
-        #     "region",
-        #     "Select a region",
-        #     choices = c("All Regions", "West", "North Central", "Northeast", "South"),
-        #     selected = "All Regions"
-        # ),
-        # ,
-        # dateRangeInput("dates",
-        #                label = "Select dates")
-        # ,
-        # downloadButton("download")
-        
     ),
     card(
         card_header(
@@ -57,7 +44,34 @@ ui <- page_sidebar(
 )
 
 
+# Attempt at placing buttons above the plot
+# ui <- fluidPage(
+#     # Title or text output for the top of the page (optional)
+#     theme = bs_theme(version = 5, preset = "superhero"),
+#     title = "Storm Damage in the US",
+#     
+#     # Row to place buttons above the plot
+#     fluidRow(
+#         column(
+#             12,
+#             actionButton("btn_all_region", "All Regions", class = "btn-danger"),
+#             actionButton("btn_west", "West"),
+#             actionButton("btn_north_central", "North Central"),
+#             actionButton("btn_northeast", "Northeast"),
+#             actionButton("btn_south", "South")
+#         )
+#     ),
+#     
+#     # Plot output below the buttons
+#     fluidRow(
+#         column(12,  # Full-width column for the plot
+#                plotOutput("plot", height = "800px")
+#         )
+#     )
+# )
+
 server <- function(input, output, session) {
+    #bs_themer()
     
     # Reactive value to store the selected region
     selected_region <- reactiveVal("All Regions")

@@ -10,26 +10,23 @@ load("data/output/storms.rda")
 
 storm_vars <- c(
     "Crop Damage" = "damage_crops",
-    "Property Damage" = "damage_property",
-    "Indirect Deaths" = "deaths_indirect",
-    "Direct Deaths" = "deaths_direct"
+    "Property Damage" = "damage_property"
+    
 )
 
 ui <- page_sidebar(
-    title = "Storm Damage in the US",
-    sidebar = sidebar(
-        # selectInput(
-        #     "event_type", "Select a storm type",
-        #     choices = c()
-        # ),
+    title = "Storm Damage in the US", sidebar = sidebar(
         selectInput(
-            "region", "Select a region",
-            choices = c("West", "North Central", "Northeast", "South", "All regions"),
-            selected = "All regions"
+            "region",
+            "Select a region",
+            choices = c("All Regions", "West", "North Central", "Northeast", "South"),
+            selected = "All Regions"
         ),
         selectInput(
-            "var", "Select a variable",
-            choices = storm_vars, selected = "sum_damage_property"
+            "var",
+            "Select a variable",
+            choices = storm_vars,
+            selected = "damage_property"
         )
         # ,
         # dateRangeInput("dates",
@@ -62,20 +59,7 @@ server <- function(input, output, session) {
                        filter(region == input$region))  # Filter by selected region
         }
     })
-    
-    # output$download <- downloadHandler(
-    #     filename = function() {
-    #         # Remove spaces, convert to lowercase, and add .csv suffix
-    #         input$name |>
-    #             stringr::str_replace(" ", "_") |>
-    #             tolower() |>
-    #             paste0(".csv")
-    #     },
-    #     content = function(file) {
-    #         # Write desired data to `file`
-    #         readr::write_csv(d_city(), file)
-    #     }
-    # )
+
     
     # Update event types when region changes
     observe({

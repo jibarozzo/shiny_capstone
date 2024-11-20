@@ -36,7 +36,6 @@ states <- datasets::state.name
 state_region_map <- setNames(regions, states)
 
 storms <- storm_details %>%
-    slice_sample(n = 1000) %>%
     filter(str_detect(event_type, 'Storm')) %>%
     select(
         begin_yearmonth,
@@ -58,7 +57,8 @@ storms <- storm_details %>%
             TRUE ~ "Unknown"
         )
     ) %>%
-    relocate(region, year_fct, .after = state)
+    relocate(region, year_fct, .after = state) %>%
+    slice_sample(n = 1000)
 
 
-save(storms, file = "data/output/storms.rda")
+saveRDS(storms, file = "data/output/storms.rds")

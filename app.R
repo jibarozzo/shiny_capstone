@@ -1,4 +1,3 @@
-#
 library(tidyverse)
 library(shiny)
 library(bslib)
@@ -7,6 +6,7 @@ source("R/imp_clean_funs.R")
 
 # Loading data
 load("data/output/storms.rda")
+storms <- readRDS(here::here("data/output/storms.rds"))
 
 storm_vars <- c(
     "Crop Damage" = "damage_crops",
@@ -15,19 +15,29 @@ storm_vars <- c(
 )
 
 ui <- page_sidebar(
-    title = "Storm Damage in the US", sidebar = sidebar(
-        selectInput(
-            "region",
-            "Select a region",
-            choices = c("All Regions", "West", "North Central", "Northeast", "South"),
-            selected = "All Regions"
-        ),
+    title = "Storm Damage in the US", 
+    sidebar = sidebar(
+        actionButton("btn_all_region", "All Regions", class = "btn-danger"),
+        actionButton("btn_west", "West"),
+        actionButton("btn_north_central", "North Central"),
+        actionButton("btn_northeast", "Northeast"),
+        actionButton("btn_south", "South"),
+        hr(),
+        
         selectInput(
             "var",
             "Select a variable",
             choices = storm_vars,
             selected = "damage_property"
         )
+        
+        # Old logic
+        # selectInput(
+        #     "region",
+        #     "Select a region",
+        #     choices = c("All Regions", "West", "North Central", "Northeast", "South"),
+        #     selected = "All Regions"
+        # ),
         # ,
         # dateRangeInput("dates",
         #                label = "Select dates")
@@ -48,30 +58,55 @@ ui <- page_sidebar(
 
 server <- function(input, output, session) {
     
+    # Reactive value to store the selected region
+    selected_region <- reactiveVal("All Regions")
+    
+    # Update selected region when buttons are clicked
+    observeEvent(input$btn_all_region, {
+        selected_region("All Regions")
+    })
+    
+    observeEvent(input$btn_west, {
+        selected_region("West")
+    })
+    
+    observeEvent(input$btn_north_central, {
+        selected_region("North Central")
+    })
+    
+    observeEvent(input$btn_northeast, {
+        selected_region("Northeast")
+    })
+    
+    observeEvent(input$btn_south, {
+        selected_region("South")
+    })
+    
+    
     # Reactive function to filter data by region or return all data
     storm_region <- reactive({
-        req(input$region)  # Ensure region is selected
+        req(selected_region())  # Ensure region is selected
         
-        if(input$region == "All Regions") {
+        if(selected_region() == "All Regions") {
             return(storms)  # Return all storms if "All Regions" is selected
         } else {
             return(storms %>%
-                       filter(region == input$region))  # Filter by selected region
+                       filter(region == selected_region()))  # Filter by selected region
         }
     })
 
     
-    # Update event types when region changes
-    observe({
-        updateSelectInput(
-            session, "event_type",
-            choices = storms %>%
-                filter(region == input$region | input$region == "All Regions") %>%
-                distinct(event_type) %>%
-                pull(event_type)
-        )
-    })
-    
+    # observe({
+    #     updateSelectInput(
+    #         session,
+    #         "event_type",
+    #         choices = storms %>%
+    #             filter(region == selected_region() | selected_region() == "All Regions") %>%
+    #             distinct(event_type) %>%
+    #             pull(event_type)
+    #     )
+    # })
+    # 
     # Render dynamic title based on selected variable
     output$title <- renderText({
         names(storm_vars)[storm_vars == input$var]
@@ -79,6 +114,13 @@ server <- function(input, output, session) {
     
     # Render the plot
     output$plot <- renderPlot({
+        req(input$var)
+        
+        # Validate that the selected column exists in the dataset
+        if (!(input$var %in% names(storms))) {
+            return(NULL)  # If column does not exist, return NULL
+        }
+        
         storm_region() |>
             # ggplot(aes(x = year, y = .data[[input$var]])) +
             # geom_line()

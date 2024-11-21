@@ -37,18 +37,6 @@ ui <- page_fluid(
                     choices = storm_vars,
                     selected = "damage_property"
                 ),
-                # sidebarPanel(
-                #     sliderInput("years",
-                #                 "Years",
-                #                 min = 1995,
-                #                 max = 2024,
-                #                 value = c(0, 2024))
-                # ),
-                #),
-                
-                
-                #card_header(textOutput("title"))
-                
                 
             ),
             
@@ -63,10 +51,17 @@ ui <- page_fluid(
                 pre = "$"
                 
             ),
+            sliderInput(
+                "years",
+                "Years",
+                min = 1990,
+                max = 2024,
+                sep = "",
+                value = c(1990, 2024),
+            ),
             card_header(textOutput("title"), ),
             card_body(plotOutput("plot"))
         ),
-        
     )
 )
 
@@ -128,7 +123,9 @@ server <- function(input, output, session) {
         storm_region() |>
             group_by(year, event_type) |>
             filter(.data[[input$var]] >= input$cost[1] &
-                       .data[[input$var]] <= input$cost[2]) |>
+                       .data[[input$var]] <= input$cost[2] &
+                       .data[[input$var]] >= input$years[1] &
+                       .data[[input$var]] <= input$years[2]) |>
             summarise(sum_value = sum(!!sym(input$var), na.rm = TRUE), .groups = "drop") |>
             ggplot(aes(x = year, y = sum_value, color = event_type)) +
             geom_line(size = 1.2) +

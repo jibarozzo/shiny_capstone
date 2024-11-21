@@ -15,52 +15,58 @@ storm_vars <- c(
     
 )
 
-ui <- page_sidebar(
+ui <- page_fluid(
     theme = bs_theme(version = 5, preset = "sandstone"),
     title = "Storm Damage in the US",
-    sidebar = sidebar(
-        #width = 550,
-        actionButton("btn_all_region", "All Regions", class = "btn-primary"),
-        actionButton("btn_west", "West", class = "btn-secondary"),
-        actionButton("btn_north_central", "North Central", class = "btn-success"),
-        actionButton("btn_northeast", "Northeast", class = "btn-warning"),
-        actionButton("btn_south", "South", class = "btn-dark"),
-        hr(),
-
-        selectInput(
-            "var",
-            "Select a variable",
-            choices = storm_vars,
-            selected = "damage_property"
-        )
-        ,
-    
-        sidebarPanel(
-            sliderInput("cost",
-                        "Cost of Damage:",
-                        min = 0,
-                        max = 50 * 1e12,
-                        value = c(0, 40 * 1e12),
-                        width = '100%')
-        )
-        # ,
-        # sidebarPanel(
-        #     sliderInput("years",
-        #                 "Years",
-        #                 min = 1995,
-        #                 max = 2024,
-        #                 value = c(0, 2024))
-        # ),
-    ),
-    
-
     card(
-        card_header(
-            textOutput("title"),
+        full_screen = FALSE,
+        card_header("Storm Damage in the US"),
+        layout_sidebar(
+            sidebar = sidebar(
+                #width = 550,
+                actionButton("btn_all_region", "All Regions", class = "btn-primary"),
+                actionButton("btn_west", "West", class = "btn-secondary"),
+                actionButton("btn_north_central", "North Central", class = "btn-success"),
+                actionButton("btn_northeast", "Northeast", class = "btn-warning"),
+                actionButton("btn_south", "South", class = "btn-dark"),
+                hr(),
+                
+                selectInput(
+                    "var",
+                    "Select a variable",
+                    choices = storm_vars,
+                    selected = "damage_property"
+                ),
+                # sidebarPanel(
+                #     sliderInput("years",
+                #                 "Years",
+                #                 min = 1995,
+                #                 max = 2024,
+                #                 value = c(0, 2024))
+                # ),
+                #),
+                
+                
+                #card_header(textOutput("title"))
+                
+                
+            ),
+            
+            sliderInput(
+                "cost",
+                "Cost of Damage",
+                min = 0,
+                max = 50 * 1e9,
+                value = c(0, 40 * 1e9),
+                width = '100%',
+                step = 1 * 1e6,
+                pre = "$"
+                
+            ),
+            card_header(textOutput("title"), ),
+            card_body(plotOutput("plot"))
         ),
-        card_body(
-            plotOutput("plot")
-        )
+        
     )
 )
 
@@ -109,9 +115,7 @@ server <- function(input, output, session) {
     output$title <- renderText({
         names(storm_vars)[storm_vars == input$var]
     })
-    
-   # output$
-    
+
     # Render the plot
     output$plot <- renderPlot({
         req(input$var)

@@ -6,7 +6,7 @@ source("R/imp_clean_funs.R")
 
 # Loading data
 # App sources files in R/ and loads necesary objects
-# load("data/output/storms.rda")
+ load("data/output/storms.rda")
 
 
 storm_vars <- c(
@@ -137,20 +137,24 @@ server <- function(input, output, session) {
         }
         
         storm_region() |>
-            # ggplot(aes(x = year, y = .data[[input$var]])) +
-            # geom_line()
             group_by(year, event_type) |>
             summarise(
-                sum_value = sum(!!sym(input$var), na.rm = TRUE), 
+                sum_value = sum(!!sym(input$var), na.rm = TRUE),
                 .groups = "drop"
             ) |>
-            ggplot(aes(x = year, y = sum_value, colour = event_type)) +
-            geom_line() +
+            ggplot(aes(x = year, y = sum_value, color = event_type)) +
+            geom_line(size = 1.2) +
             scale_y_continuous(labels = scales::label_currency(
                 prefix = "$",
                 scale_cut = c(0, K = 1e3, M = 1e6, B = 1e9)
             )) +
-            theme_light()
+            theme_light() +
+            guides(color=guide_legend(title="Storm Type")) +
+            theme(legend.text = element_text(size = 12),
+                  legend.title = element_text(size = 16, face = "bold"), 
+                  axis.title = element_text(size = 14, face = "bold"), 
+                  axis.text = element_text(size = 12, face = "bold"))
+            
     })
 }
 

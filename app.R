@@ -1,12 +1,12 @@
-library(tidyverse)
-library(shiny)
-library(bslib)
+library(tidyverse) # Easily Install and Load the 'Tidyverse'
+library(shiny) # Web Application Framework for R
+library(bslib) # Custom 'Bootstrap' 'Sass' Themes for 'shiny' and 'rmarkdown'
 source("R/imp_clean_funs.R")
 
 
 # Loading data
 # App sources files in R/ and loads necesary objects
- load("data/output/storms.rda")
+load("data/output/storms.rda")
 
 
 storm_vars <- c(
@@ -147,5 +147,6 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui = ui, server = server)
+
 
 

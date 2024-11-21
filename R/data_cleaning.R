@@ -1,31 +1,39 @@
-# Data cleaning script for Shiny app input
+# Data cleaning script for "shiny_capstone" app
+# Part of the Intro to Shiny course from Posit Academy
 # 2024-11-17
 
 # Setup
 source("R/imp_clean_funs.R")
-library(tidyverse) # Easily Install and Load the 'Tidyverse'
-library(RCurl) # General Network (HTTP/FTP/...) Client Interface for R
-library(vroom) # Read and Write Rectangular Text Data Quickly
+library(tidyverse)
+library(RCurl)
+library(vroom) 
 library(data.table)
 
 # Import
 # Direct HTTPS import
-# url <- 'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/'
-# filenames = getURL(url, ftp.use.epsv = FALSE, dirlistonly = TRUE)
-# filenames = paste(url, strsplit(filenames, "\r*\n")[[1]], sep = "")
-# vroom(I(filenames), delim = ",")
 
-# Local file import
+https_location <- "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
+html <- read_html("https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/")
 
-# Files names 
-detail_files <- fs::dir_ls(path = "data/input", glob = "*details*")
-# fatality_files <- fs::dir_ls(path = "data/input", glob = "*fatalities*")
-# location_files <- fs::dir_ls(path = "data/input", glob = "*locations*")
+full_urls <- html %>%  
+    html_elements(css = "a") %>%
+    html_attr("href") %>%
+    .[str_detect(., "details")] %>%
+    map_chr(., ~paste0(https_location, .x))
 
-# Loaded files
-storm_details <- vroom(detail_files,  .name_repair = janitor::make_clean_names) 
-# storm_fatalities <- vroom(fatality_files)
-# storm_location <- vroom(location_files)
+
+
+###################################################################
+# For local file import
+## Files names 
+# detail_files <- fs::dir_ls(path = "data/input", glob = "*details*")
+###################################################################
+
+# Load files
+# storm_details <- vroom(detail_files,  .name_repair = janitor::make_clean_names) 
+storm_details <- vroom(full_urls,
+                       delim = ",",
+                       .name_repair = janitor::make_clean_names)
 
 
 # Cleaning and selecting for "Storm"
@@ -61,4 +69,4 @@ storms <- storm_details %>%
     #slice_sample(n = 1000)
 
 
-#save(storms, file = "data/output/storms.rda")
+save(storms, file = "data/output/storms.rda")

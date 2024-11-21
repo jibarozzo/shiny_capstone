@@ -4,11 +4,11 @@
 
 # Setup
 source("R/imp_clean_funs.R")
-library(tidyverse)
-library(RCurl)
-library(vroom) 
-library(rvest)
-library(data.table)
+library(tidyverse) # Easily Install and Load the 'Tidyverse'
+library(RCurl) # General Network (HTTP/FTP/...) Client Interface for R
+library(vroom) # Read and Write Rectangular Text Data Quickly 
+library(rvest) # Easily Harvest (Scrape) Web Pages
+library(data.table) # Extension of `data.frame`
 
 # Import
 # Direct HTTPS import
@@ -71,3 +71,4 @@ storms <- storm_details %>%
 
 
 # save(storms, file = "data/output/storms.rda")
+

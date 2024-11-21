@@ -24,7 +24,7 @@ ui <- page_fluid(
         layout_sidebar(
             sidebar = sidebar(
                 #width = 550,
-                actionButton("btn_all_region", "All Regions", class = "btn-primary"),
+                actionButton("btn_all_region", "United States", class = "btn-primary"),
                 actionButton("btn_west", "West", class = "btn-secondary"),
                 actionButton("btn_north_central", "North Central", class = "btn-success"),
                 actionButton("btn_northeast", "Northeast", class = "btn-warning"),
@@ -74,11 +74,11 @@ server <- function(input, output, session) {
     #bs_themer()
     
     # Reactive value to store the selected region
-    selected_region <- reactiveVal("All Regions")
+    selected_region <- reactiveVal("United States")
     
     # Update selected region when buttons are clicked
     observeEvent(input$btn_all_region, {
-        selected_region("All Regions")
+        selected_region("United States")
     })
     
     observeEvent(input$btn_west, {
@@ -102,8 +102,8 @@ server <- function(input, output, session) {
     storm_region <- reactive({
         req(selected_region())  # Ensure region is selected
         
-        if(selected_region() == "All Regions") {
-            return(storms)  # Return all storms if "All Regions" is selected
+        if(selected_region() == "United States") {
+            return(storms)  # Return all storms if "United States" is selected
         } else {
             return(storms %>%
                        filter(region == selected_region()))  # Filter by selected region
@@ -129,8 +129,6 @@ server <- function(input, output, session) {
             group_by(year, event_type) |>
             filter(.data[[input$var]] >= input$cost[1] &
                        .data[[input$var]] <= input$cost[2]) |>
-            # filter(.data[[input$var]] >= input$years[1] &
-            #            .data[[input$var]] <= input$years[2]) |>
             summarise(sum_value = sum(!!sym(input$var), na.rm = TRUE), .groups = "drop") |>
             ggplot(aes(x = year, y = sum_value, color = event_type)) +
             geom_line(size = 1.2) +

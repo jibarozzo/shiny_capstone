@@ -16,9 +16,10 @@ storm_vars <- c(
 )
 
 ui <- page_sidebar(
-    theme = bs_theme(version = 5, preset = "superhero"),
+    theme = bs_theme(version = 5, preset = "sandstone"),
     title = "Storm Damage in the US",
     sidebar = sidebar(
+        #width = 550,
         actionButton("btn_all_region", "All Regions", class = "btn-primary"),
         actionButton("btn_west", "West", class = "btn-secondary"),
         actionButton("btn_north_central", "North Central", class = "btn-success"),
@@ -32,7 +33,27 @@ ui <- page_sidebar(
             choices = storm_vars,
             selected = "damage_property"
         )
+        ,
+    
+        sidebarPanel(
+            sliderInput("cost",
+                        "Cost of Damage:",
+                        min = 0,
+                        max = 50 * 1e12,
+                        value = c(0, 40 * 1e12),
+                        width = '100%')
+        )
+        # ,
+        # sidebarPanel(
+        #     sliderInput("years",
+        #                 "Years",
+        #                 min = 1995,
+        #                 max = 2024,
+        #                 value = c(0, 2024))
+        # ),
     ),
+    
+
     card(
         card_header(
             textOutput("title"),
@@ -42,33 +63,6 @@ ui <- page_sidebar(
         )
     )
 )
-
-
-# Attempt at placing buttons above the plot
-# ui <- fluidPage(
-#     # Title or text output for the top of the page (optional)
-#     theme = bs_theme(version = 5, preset = "superhero"),
-#     title = "Storm Damage in the US",
-#     
-#     # Row to place buttons above the plot
-#     fluidRow(
-#         column(
-#             12,
-#             actionButton("btn_all_region", "All Regions", class = "btn-danger"),
-#             actionButton("btn_west", "West"),
-#             actionButton("btn_north_central", "North Central"),
-#             actionButton("btn_northeast", "Northeast"),
-#             actionButton("btn_south", "South")
-#         )
-#     ),
-#     
-#     # Plot output below the buttons
-#     fluidRow(
-#         column(12,  # Full-width column for the plot
-#                plotOutput("plot", height = "800px")
-#         )
-#     )
-# )
 
 server <- function(input, output, session) {
     #bs_themer()
@@ -110,22 +104,13 @@ server <- function(input, output, session) {
         }
     })
 
-    
-    # observe({
-    #     updateSelectInput(
-    #         session,
-    #         "event_type",
-    #         choices = storms %>%
-    #             filter(region == selected_region() | selected_region() == "All Regions") %>%
-    #             distinct(event_type) %>%
-    #             pull(event_type)
-    #     )
-    # })
-    # 
+
     # Render dynamic title based on selected variable
     output$title <- renderText({
         names(storm_vars)[storm_vars == input$var]
     })
+    
+   # output$
     
     # Render the plot
     output$plot <- renderPlot({
@@ -138,10 +123,11 @@ server <- function(input, output, session) {
         
         storm_region() |>
             group_by(year, event_type) |>
-            summarise(
-                sum_value = sum(!!sym(input$var), na.rm = TRUE),
-                .groups = "drop"
-            ) |>
+            filter(.data[[input$var]] >= input$cost[1] &
+                       .data[[input$var]] <= input$cost[2]) |>
+            # filter(.data[[input$var]] >= input$years[1] &
+            #            .data[[input$var]] <= input$years[2]) |>
+            summarise(sum_value = sum(!!sym(input$var), na.rm = TRUE), .groups = "drop") |>
             ggplot(aes(x = year, y = sum_value, color = event_type)) +
             geom_line(size = 1.2) +
             scale_y_continuous(labels = scales::label_currency(
@@ -149,11 +135,13 @@ server <- function(input, output, session) {
                 scale_cut = c(0, K = 1e3, M = 1e6, B = 1e9)
             )) +
             theme_light() +
-            guides(color=guide_legend(title="Storm Type")) +
-            theme(legend.text = element_text(size = 12),
-                  legend.title = element_text(size = 16, face = "bold"), 
-                  axis.title = element_text(size = 14, face = "bold"), 
-                  axis.text = element_text(size = 12, face = "bold"))
+            guides(color = guide_legend(title = "Storm Type")) +
+            theme(
+                legend.text = element_text(size = 12),
+                legend.title = element_text(size = 16, face = "bold"),
+                axis.title = element_text(size = 14, face = "bold"),
+                axis.text = element_text(size = 12, face = "bold")
+            )
             
     })
 }

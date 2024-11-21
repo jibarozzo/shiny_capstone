@@ -48,8 +48,8 @@ storms <- storm_details %>%
     ) %>%
     mutate(
         year_fct = factor(year, exclude =  ""),
-        damage_property = so_formatter(., "damage_property"),
-        damage_crops = so_formatter(., "damage_crops"),
+        damage_property = str_num_formatter(., "damage_property"),
+        damage_crops = str_num_formatter(., "damage_crops"),
         state = str_to_sentence(state),
         region =  case_when(
             state %in% names(state_region_map) ~ state_region_map[state],
@@ -57,8 +57,8 @@ storms <- storm_details %>%
             TRUE ~ "Unknown"
         )
     ) %>%
-    relocate(region, year_fct, .after = state) %>%
-    slice_sample(n = 1000)
+    relocate(region, year_fct, .after = state) 
+    #slice_sample(n = 1000)
 
 
 save(storms, file = "data/output/storms.rda")

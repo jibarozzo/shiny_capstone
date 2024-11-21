@@ -26,12 +26,22 @@ convert_str_num <- function(data, column) {
 }
 
 # String to number formatter (e.g., "1M" to 1000000)
-so_formatter <- function(data, column) {
+str_num_formatter <- function(data, column) {
     dplyr::case_when(
         grepl("K$", data[[column]]) ~ as.numeric(sub("K$", "", data[[column]])) * 1e3,
         grepl("M$", data[[column]]) ~ as.numeric(sub("M$", "", data[[column]])) * 1e6,
         grepl("B$", data[[column]]) ~ as.numeric(sub("B$", "", data[[column]])) * 1e9,
         TRUE ~ as.numeric(data[[column]])
+    )
+}
+
+num_str_formatter <- function(x) {
+    dplyr::case_when(
+        x < 1e3 ~ as.character(x),
+        x < 1e6 ~ paste0(as.character(x/1e3), "K"),
+        x < 1e9 ~ paste0(as.character(x/1e6), "M"),
+        x < 1e12 ~ paste0(as.character(x/1e9), "B"),
+        TRUE ~ as.numeric(x)
     )
 }
 

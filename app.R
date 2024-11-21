@@ -51,14 +51,15 @@ ui <- page_fluid(
                 pre = "$"
                 
             ),
-            sliderInput(
-                "years",
-                "Years",
-                min = 1990,
-                max = 2024,
-                sep = "",
-                value = c(1990, 2024),
-            ),
+            
+            # sliderInput(
+            #     "years",
+            #     "Years",
+            #     min = min(storms$year),
+            #     max = max(storms$year),
+            #     sep = "",
+            #     value = c(1996, 2024),
+            # ),
             card_header(textOutput("title"), ),
             card_body(plotOutput("plot"))
         ),
@@ -123,9 +124,9 @@ server <- function(input, output, session) {
         storm_region() |>
             group_by(year, event_type) |>
             filter(.data[[input$var]] >= input$cost[1] &
-                       .data[[input$var]] <= input$cost[2] &
-                       .data[[input$var]] >= input$years[1] &
-                       .data[[input$var]] <= input$years[2]) |>
+                      .data[[input$var]] <= input$cost[2]) |>
+            # filter(.data[[input$var]] >= input$years[1] &
+            #           .data[[input$var]] <= input$years[2]) |>
             summarise(sum_value = sum(!!sym(input$var), na.rm = TRUE), .groups = "drop") |>
             ggplot(aes(x = year, y = sum_value, color = event_type)) +
             geom_line(size = 1.2) +
@@ -141,7 +142,6 @@ server <- function(input, output, session) {
                 axis.title = element_text(size = 14, face = "bold"),
                 axis.text = element_text(size = 12, face = "bold")
             )
-            
     })
 }
 

@@ -7,6 +7,7 @@ source("R/imp_clean_funs.R")
 library(tidyverse)
 library(RCurl)
 library(vroom) 
+library(rvest)
 library(data.table)
 
 # Import
@@ -69,4 +70,4 @@ storms <- storm_details %>%
     #slice_sample(n = 1000)
 
 
-save(storms, file = "data/output/storms.rda")
+# save(storms, file = "data/output/storms.rda")

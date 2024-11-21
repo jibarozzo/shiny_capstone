@@ -129,7 +129,7 @@ server <- function(input, output, session) {
             #           .data[[input$var]] <= input$years[2]) |>
             summarise(sum_value = sum(!!sym(input$var), na.rm = TRUE), .groups = "drop") |>
             ggplot(aes(x = year, y = sum_value, color = event_type)) +
-            geom_line(size = 1.2) +
+            geom_line(linewidth = 1.2) +
             scale_y_continuous(labels = scales::label_currency(
                 prefix = "$",
                 scale_cut = c(0, K = 1e3, M = 1e6, B = 1e9)

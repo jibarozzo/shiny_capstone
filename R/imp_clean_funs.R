@@ -1,6 +1,5 @@
 # Functions for importing and cleaning data for "shiny_captone" project
 
-
 read_data <- function(x, pattern) {
     # Creating a list of files
     list.files(
